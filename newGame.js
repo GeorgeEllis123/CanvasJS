@@ -1,3 +1,17 @@
+function fixVelocity () {
+  if ((player.center[1]+player.yVelocity) < 0) {
+    player.yVelocity = 0;
+  }
+  if ((player.center[1]+player.yVelocity) > canvas.height){
+    player.yVelocity = 0;
+  }
+  if ((player.center[0]+player.xVelocity) < 0) {
+    player.xVelocity = 0;
+  }
+  if ((player.center[0]+player.xVelocity) > canvas.width){
+    player.xVelocity = 0;
+  }
+}
 
 function myKeyDown (event) {
   /*
@@ -15,42 +29,16 @@ function myKeyDown (event) {
   // console.log(keyStrDown);
 
   if (keyStrDown == 'w') {
-    // Move circle up
-    if (player.yVelocity == 5){
-      player.yVelocity -= 10;
-    }
-    else if (player.yVelocity == 0){
-      player.yVelocity -= 5;
-    }
-
+    player.yVelocity = -5;
   }
   if (keyStrDown == 'a') {
-    // Move circle up
-    if (player.xVelocity == 5){
-      player.xVelocity -= 10;
-    }
-    else if (player.xVelocity == 0){
-      player.xVelocity -= 5;
-    }
+    player.xVelocity = -5;
   }
   if (keyStrDown == 's') {
-    // Move circle up
-    if (player.yVelocity == -5){
-      player.yVelocity = 5;
-    }
-    else if (player.yVelocity == 0){
-      player.yVelocity = 5;
-      console.log("s down");
-    }
+    player.yVelocity = 5;
   }
   if (keyStrDown == 'd') {
-    // Move circle up
-    if (player.xVelocity == -5){
-      player.xVelocity += 10;
-    }
-    else if (player.xVelocity == 0){
-      player.xVelocity += 5;
-    }
+    player.xVelocity = 5;
   }
   //console.log(player.yVelocity);
   //console.log(player.xVelocity);
@@ -72,19 +60,14 @@ function myKeyUp (event) {
   // console.log(keyStrUp);
 
   if (keyStrUp == 'w') {
-   player.yVelocity = 5;
+    player.yVelocity = 0;
   }
-
+  if (keyStrUp == 'a') {
+    player.xVelocity = 0;
+  }
   if (keyStrUp == 's') {
     player.yVelocity = 0;
-    console.log(player.yVelocity);
-
   }
-
-  if (keyStrUp == 'a') {
-    player.xVelocity = 5;
-  }
-
   if (keyStrUp == 'd') {
     player.xVelocity = 0;
   }
@@ -106,27 +89,81 @@ function drawAll()
   line.applyVelocity();
   line.bounceCheck();
 
+  fixVelocity();
   player.applyVelocity();
+  var collision = player.checkCircleLineCollision(line, context);
 
   // Draw the new frame
   context.clearRect(0, 0, canvas.width, canvas.height);
   line.draw();
   player.draw();
-  coin1.draw();
-  coin2.draw();
-  coin3.draw();
-  coin4.draw();
-  coin5.draw();
-  coin6.draw();
-  coin7.draw();
-  coin8.draw();
-  coin9.draw();
-  coin10.draw();
 
+  totalCollected = 0; // Resets the amount of total collected coins
 
-  // Loop the animation to the next frame.
-  window.requestAnimationFrame(drawAll);
+  coin1.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin1.collected == "true") {totalCollected += 1;}
+  else {coin1.draw();}
+
+  coin2.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin2.collected == "true") {totalCollected += 1;}
+  else {coin2.draw();}
+
+  coin3.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin3.collected == "true") {totalCollected += 1;}
+  else {coin3.draw();}
+
+  coin4.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin4.collected == "true") {totalCollected += 1;}
+  else {coin4.draw();}
+
+  coin5.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin5.collected == "true") {totalCollected += 1;}
+  else {coin5.draw();}
+
+  coin6.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin6.collected == "true") {totalCollected += 1;}
+  else {coin6.draw();}
+
+  coin7.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin7.collected == "true") {totalCollected += 1;}
+  else {coin7.draw();}
+
+  coin8.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin8.collected == "true") {totalCollected += 1;}
+  else {coin8.draw();}
+
+  coin9.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin9.collected == "true") {totalCollected += 1;}
+  else {coin9.draw();}
+
+  coin10.checkCollision([player.center[0], player.center[1]], player.radius);
+  if (coin10.collected == "true") {totalCollected += 1;}
+  else {coin10.draw();}
+  context.fillStyle = "black";
+  context.fillText("Coins Collected " + totalCollected + "/10", canvas.width-110, 50);
+
+  if (totalCollected < 10 && collision == "false") {
+    // Loop the game to the next frame.
+    window.requestAnimationFrame(drawAll);
+  }
+  else if (totalCollected == 10) {
+    context.font = "75px Comic Sans MS";
+    context.textAlign = "center";
+    context.fillText("VICTORY", canvas.width/2, canvas.height/2);
+    context.font = "25px Comic Sans MS";
+    context.textAlign = "center";
+    context.fillText("Refresh Page to Play Again", canvas.width/2, canvas.height/2 + 50);
+  }
+  else {
+    context.font = "75px Comic Sans MS";
+    context.textAlign = "center";
+    context.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+    context.font = "25px Comic Sans MS";
+    context.textAlign = "center";
+    context.fillText("Refresh Page to Play Again", canvas.width/2, canvas.height/2 + 50);
+  }
 }
+
 
 // Set up the canvas and context objects
 context = setUpContext();
@@ -167,6 +204,10 @@ randY = (Math.random() * canvas.height);
 coin10 = new Coin (randX, randY, 10);
 randX = (Math.random() * canvas.width);
 randY = (Math.random() * canvas.height);
+var totalCollected = 0;
+
+context.font = "20px Comic Sans MS";
+context.textAlign = "center";
 
 // Create instance of Line object
 line = new Line(0, 0, 0, 0, context);
