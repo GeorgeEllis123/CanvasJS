@@ -12,34 +12,20 @@ class Coin {
   get state() {return this.collected;}
   set state(newState) {return this.collected;}
 
-  checkCollision(playerPoints) {
-    playerL = [playerPoints[0]]
-    playerTL = [playerPoints[1]]
-    playerT = [playerPoints[2]]
-    playerTR = [playerPoints[3]]
-    playerR = [playerPoints[4]]
-    playerBR = [playerPoints[5]]
-    playerB = [playerPoints[6]]
-    playerBL = [playerPoints[7]]
-    var leg1 = floor((this.radius/Math.sin(45)))
-    var leg2 = floor(sqrt((this.radius*this.radius) - (this.leg1*this.leg1)))
-    coinL = [(this.center[0] - this.radius), this.center[1]]
-    coinTL = [(this.center[0] - leg2), (this.center - leg2)]
-    coinT = [(this.center[0]), this.center[1] - this.radius]
-    coinTR = [(this.center[0] + leg2), (this.center - leg2)]
-    coinR = [(this.center[0] + this.radius), this.center[1]]
-    coinBR = [(this.center[0] + leg2), (this.center + leg2)]
-    coinB = [(this.center[0]), this.center[1] + this.radius]
-    coinBL = [(this.center[0] - leg2), (this.center + leg2)]
+  checkCollision(playerCenter, playerRadius) {
+    var centerDistance = Math.sqrt(Math.pow((playerCenter[0]-this.center[0]), 2) + Math.pow((playerCenter[1]-this.center[1]), 2));
+    var totalRadius = playerRadius + this.radius;
+    if (totalRadius >= centerDistance) {
+      this.collected = "true";
+    }
   }
 
   draw() {
     if (this.collected == "false"){
-      context.fillStyle = "green";
-      context.stroke();
+      context.fillStyle = "yellow";
       context.beginPath();
       context.arc(this.center[0], this.center[1], this.radius, 0, 2*Math.PI);
-      context.stroke();
+      context.fill();
     }
   }
 }
@@ -60,9 +46,9 @@ class Player {
 
   // Getters and setters for velocities
   get xVelocity() {return this.vel[0];}
-  set xVelocity(change) {this.vel[0] += change;}
+  set xVelocity(change) {this.vel[0] = change;}
   get yVelocity() {return this.vel[1];}
-  set yVelocity(change) {this.vel[1] += change;}
+  set yVelocity(change) {this.vel[1] = change;}
 
   applyVelocity() {
     // Add velocity to position in each coordinate
@@ -70,36 +56,53 @@ class Player {
     this.center[1] += this.vel[1];
   }
 
-  checkHorizontalCollision(width) {
-    if (this.vel[0] > 0) {
-      if (this.center[0] + this.radius + this.velConstant >= width) {return "right";}
+  checkCircleLineCollision(line, context) {
+    var centerToPT1 = Math.sqrt(Math.pow((line.pt1[0]-this.center[0]), 2) + Math.pow((line.pt1[1]-this.center[1]), 2));
+    //console.log(centerToPT1)
+    if (centerToPT1 <= this.radius) {
+      return "true";
     }
-    else if (this.vel[0] < 0) {
-      if (this.center[0] - this.radius - this.velConstant <= 0) {return "left";}
+    var centerToPT2 = Math.sqrt(Math.pow((line.pt2[0]-this.center[0]), 2) + Math.pow((line.pt2[1]-this.center[1]), 2));
+    //console.log(centerToPT2)
+    if (centerToPT2 <= this.radius) {
+      return "true";
     }
-    else {
-      return "false";
-    }
-  }
+    var slope = ((line.pt1[1]-line.pt2[1]) / (line.pt1[0]-line.pt2[0]))
+    var perpendicularSlope = (-1 / slope);
+    //console.log(slope);
+    //console.log(perpendicularSlope);
+    var xOnLine = (((line.pt1[0]*slope) - line.pt1[1] - (this.center[0]*perpendicularSlope) + this.center[1]) / (slope-perpendicularSlope));
+    var yOnLine = (slope*(xOnLine - line.pt1[0]) + line.pt1[1]);
 
-  checkVerticalCollision(height) {
-    if (this.vel[1] > 0) {
-      if (this.center[1] + this.radius + this.velConstant >= height) {return "top";}
+    //console.log(line.pt1);
+    //console.log(line.pt2);
+    //console.log("------------------")
+    //console.log(xOnLine);
+    //console.log(yOnLine);
+    if (line.pt2[0] - line.pt1[0] >= 0) {
+      if (line.pt1[0] <= xOnLine <= line.pt2[0]) {
+        var dist = Math.sqrt(Math.pow((xOnLine-this.center[0]), 2) + Math.pow((yOnLine-this.center[1]), 2));
+        if (dist <= this.radius) {
+          return "true";
+        }
+      }
     }
-    else if (this.vel[1] < 0) {
-      if (this.center[1] - this.radius - this.velConstant <= 0) {return "bottom";}
+    if (line.pt1[0] - line.pt2[0] >= 0) {
+      if (line.pt2[0] <= xOnLine <= line.pt1[0]) {
+        var dist = Math.sqrt(Math.pow((xOnLine-this.center[0]), 2) + Math.pow((yOnLine-this.center[1]), 2));
+        if (dist <= this.radius) {
+          return "true";
+        }
+      }
     }
-    else {
-      return "false";
-    }
+    return "false";
   }
 
   draw() {
     context.fillStyle = "blue";
-    context.stroke();
     context.beginPath();
     context.arc(this.center[0], this.center[1], this.radius, 0, 2*Math.PI);
-    context.stroke();
+    context.fill();
   }
 }
 
@@ -209,15 +212,12 @@ class Line {
 }
 
 function setUpContext() {
-  // Get width/height of the browser window
-  console.log("Window is %d by %d", window.innerWidth, window.innerHeight);
-
-  // Get the canvas, set the width and height from the window
   canvas = document.getElementById("mainCanvas");
   // I found that - 20 worked well for me, YMMV
   canvas.width = window.innerWidth - 20;
   canvas.height = window.innerHeight - 20;
   canvas.style.border = "1px solid black";
+  console.log(window.innerWidth, window.innerHeight);
 
   // Set up the context for the animation
   context = canvas.getContext("2d");
