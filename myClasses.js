@@ -13,6 +13,7 @@ class Coin {
   set state(newState) {return this.collected;}
 
   checkCollision(playerCenter, playerRadius) {
+    // Checks if the coin gets collected
     var centerDistance = Math.sqrt(Math.pow((playerCenter[0]-this.center[0]), 2) + Math.pow((playerCenter[1]-this.center[1]), 2));
     var totalRadius = playerRadius + this.radius;
     if (totalRadius >= centerDistance) {
@@ -57,30 +58,24 @@ class Player {
   }
 
   checkCircleLineCollision(line, context) {
+    // Checks if the player collides with the circle
+    // Checks if the edge points of the line are inside the circle
     var centerToPT1 = Math.sqrt(Math.pow((line.pt1[0]-this.center[0]), 2) + Math.pow((line.pt1[1]-this.center[1]), 2));
-    //console.log(centerToPT1)
     if (centerToPT1 <= this.radius) {
       return "true";
     }
     var centerToPT2 = Math.sqrt(Math.pow((line.pt2[0]-this.center[0]), 2) + Math.pow((line.pt2[1]-this.center[1]), 2));
-    //console.log(centerToPT2)
     if (centerToPT2 <= this.radius) {
       return "true";
     }
+    // Checks if the rest of the line segment is inside the circle
     var slope = ((line.pt1[1]-line.pt2[1]) / (line.pt1[0]-line.pt2[0]))
     var perpendicularSlope = (-1 / slope);
-    //console.log(slope);
-    //console.log(perpendicularSlope);
     var xOnLine = (((line.pt1[0]*slope) - line.pt1[1] - (this.center[0]*perpendicularSlope) + this.center[1]) / (slope-perpendicularSlope));
     var yOnLine = (slope*(xOnLine - line.pt1[0]) + line.pt1[1]);
 
-    //console.log(line.pt1);
-    //console.log(line.pt2);
-    //console.log("------------------")
-    //console.log(xOnLine);
-    //console.log(yOnLine);
     if (line.pt2[0] - line.pt1[0] >= 0) {
-      if (line.pt1[0] <= xOnLine <= line.pt2[0]) {
+      if ((line.pt1[0] <= xOnLine) && (xOnLine <= line.pt2[0])) {
         var dist = Math.sqrt(Math.pow((xOnLine-this.center[0]), 2) + Math.pow((yOnLine-this.center[1]), 2));
         if (dist <= this.radius) {
           return "true";
@@ -88,7 +83,7 @@ class Player {
       }
     }
     if (line.pt1[0] - line.pt2[0] >= 0) {
-      if (line.pt2[0] <= xOnLine <= line.pt1[0]) {
+      if ((line.pt1[0] >= xOnLine) && (xOnLine >= line.pt2[0])) {
         var dist = Math.sqrt(Math.pow((xOnLine-this.center[0]), 2) + Math.pow((yOnLine-this.center[1]), 2));
         if (dist <= this.radius) {
           return "true";
@@ -154,49 +149,41 @@ class Line {
       this.pt1[0] = canvas.width;
       this.vel1[0] += Math.random() - 0.5;
       if (this.vel1[0] > 0) {this.vel1[0] *= -1;}
-      // console.log(line);
     }
     if (this.pt1[0] < 0) {
       this.pt1[0] = 0;
       this.vel1[0] += Math.random() - 0.5;
       if (this.vel1[0] < 0) {this.vel1[0] *= -1;}
-      // console.log(line);
     }
     if (this.pt2[0] > canvas.width) {
       this.pt2[0] = canvas.width;
       this.vel2[0] += Math.random() - 0.5;
       if (this.vel2[0] > 0) {this.vel2[0] *= -1;}
-      // console.log(line);
     }
     if (this.pt2[0] < 0) {
       this.pt2[0] = 0;
       this.vel2[0] += Math.random() - 0.5;
       if (this.vel2[0] < 0) {this.vel2[0] *= -1;}
-      // console.log(line);
     }
     if (this.pt1[1] > canvas.height) {
       this.pt1[1] = canvas.height;
       this.vel1[1] += Math.random() - 0.5;
       if (this.vel1[1] > 0) {this.vel1[1] *= -1;}
-      // console.log(line);
     }
     if (this.pt1[1] < 0) {
       this.pt1[1] = 0;
       this.vel1[1] += Math.random() - 0.5;
       if (this.vel1[1] < 0) {this.vel1[1] *= -1;}
-      // console.log(line);
     }
     if (this.pt2[1] > canvas.height) {
       this.pt2[1] = canvas.height;
       this.vel2[1] += Math.random() - 0.5;
       if (this.vel2[1] > 0) {this.vel2[1] *= -1;}
-      // console.log(line);
     }
     if (this.pt2[1] < 0) {
       this.pt2[1] = 0;
       this.vel2[1] += Math.random() - 0.5;
       if (this.vel2[1] < 0) {this.vel2[1] *= -1;}
-      // console.log(line);
     }
   }
 
@@ -217,7 +204,6 @@ function setUpContext() {
   canvas.width = window.innerWidth - 20;
   canvas.height = window.innerHeight - 20;
   canvas.style.border = "1px solid black";
-  console.log(window.innerWidth, window.innerHeight);
 
   // Set up the context for the animation
   context = canvas.getContext("2d");
