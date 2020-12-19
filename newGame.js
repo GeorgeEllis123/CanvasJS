@@ -1,4 +1,10 @@
 function fixVelocity () {
+  /*
+    Parameters: none
+    Returns: None, but modifies the global varaiable for the player velocity.
+    Purpose: To make sure the player doesn't leave the screen.
+  */
+  // checks to see if the player would leave the window and adjust accordingly
   if ((player.center[1]+player.yVelocity) < 0) {
     player.yVelocity = 0;
   }
@@ -24,9 +30,6 @@ function myKeyDown (event) {
   //   that was pressed to trigger the event listener.
   keyCodeDown = event.which;
   keyStrDown = event.key;
-  // console.log(event);
-  // console.log(keyCodeDown);
-  // console.log(keyStrDown);
 
   if (keyStrDown == 'w') {
     player.yVelocity = -5;
@@ -40,8 +43,6 @@ function myKeyDown (event) {
   if (keyStrDown == 'd') {
     player.xVelocity = 5;
   }
-  //console.log(player.yVelocity);
-  //console.log(player.xVelocity);
 }
 
 function myKeyUp (event) {
@@ -51,13 +52,8 @@ function myKeyUp (event) {
     Returns: None, but modifies global variables which track response to event.
     Purpose: Make the animation respond to keys being pressed.
   */
-  // One of the attributes of the event object is 'which,' contains the key
-  //   that was pressed to trigger the event listener.
   keyCodeUp = event.which;
   keyStrUp = event.key;
-  // console.log(event);
-  // console.log(keyCodeUp);
-  // console.log(keyStrUp);
 
   if (keyStrUp == 'w') {
     player.yVelocity = 0;
@@ -71,9 +67,6 @@ function myKeyUp (event) {
   if (keyStrUp == 'd') {
     player.xVelocity = 0;
   }
-
-  //console.log(player.yVelocity);
-  //console.log(player.xVelocity);
 }
 
 
@@ -100,6 +93,7 @@ function drawAll()
 
   totalCollected = 0; // Resets the amount of total collected coins
 
+  // Draws all the coins
   coin1.checkCollision([player.center[0], player.center[1]], player.radius);
   if (coin1.collected == "true") {totalCollected += 1;}
   else {coin1.draw();}
@@ -142,6 +136,7 @@ function drawAll()
   context.fillStyle = "black";
   context.fillText("Coins Collected " + totalCollected + "/10", canvas.width-110, 50);
 
+  // Checks if the game is over and displays text accordingly
   if (totalCollected < 10 && collision == "false") {
     // Loop the game to the next frame.
     window.requestAnimationFrame(drawAll);
@@ -206,15 +201,14 @@ randX = (Math.random() * canvas.width);
 randY = (Math.random() * canvas.height);
 var totalCollected = 0;
 
+// Text
 context.font = "20px Comic Sans MS";
 context.textAlign = "center";
 
 // Create instance of Line object
 line = new Line(0, 0, 0, 0, context);
-// console.log(line);
 
 player = new Player(canvas.width/2, canvas.height/2, 30, context)
-// console.log(player);
 
 // Fire up the animation engine
 window.requestAnimationFrame(drawAll);
